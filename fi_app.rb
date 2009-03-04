@@ -6,6 +6,7 @@ module FiApp
 
 		def initialize
 			@listeners = []
+			@binding = binding # Default binding is the obj.
 		end
 
 		def resume_with_request(request)
@@ -18,12 +19,14 @@ module FiApp
 			self
 		end
 
-		def send_page(template, binding)
-			eruby = Erbinus::Eruby.new(File.read(template))
+		def send_page(template, binding = @binding)
+			# Deregister all listeners for any previous page
+			@listeners = []
+			eruby = Erubis::Eruby.new(File.read('views/' + template + '.eruby'))
 			[200, { 'Content-Type' => 'text/html' }, eruby.result(binding)]
 		end
 
-		def send_page_and_wait(template, binding)
+		def send_page_and_wait(template, binding = @binding)
 			Fiber.yield send_page(template, binding)
 		end
 
@@ -33,6 +36,7 @@ module FiApp
 				# Stop if an event returns something
 				return tmp if !tmp.nil?
 			}
+			[200, { 'Content-Type' => 'application/javascript' }, []]
 		end
 
 	end
@@ -84,8 +88,8 @@ module FiApp
 
 		def fire(event, target)
 			begin
-				@events[event.to_sym].call() 
-			rescue
+				return @events[event.to_sym].call() 
+			rescue NoMethodError => e
 				nil # Did not exist, Thats ok - we return nil
 			end if target == @name
 		end
@@ -95,9 +99,7 @@ module FiApp
 
 		def initialize args
 			super(args[:name])
-			args[:events].each_pair { |v|
-				@events[v[0]] = v[1]
-			}
+			@events = args[:events]
 		end
 
 		def html

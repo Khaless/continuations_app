@@ -4,6 +4,9 @@ use Rack::Session::Cookie, :key => 'session',
 													 :expire_after => 2592000,
 													 :secret => 'my_secret'
 
-require 'continuation_app.rb'
+require 'fi_app.rb'
 require 'my_app.rb'
-run Rack::Session::Cookie.new(ContinuationApplication::Router.new(MyApp))
+app = Rack::URLMap.new('/app' => Rack::Session::Cookie.new(FiApp::Router.new(MyApp)),
+											 '/static' => Rack::File.new('./static'))
+Thin::Server.start('0.0.0.0', 3000, app)
+
