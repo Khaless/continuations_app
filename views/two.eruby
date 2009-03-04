@@ -1,0 +1,13 @@
+<html>
+	<head>
+		<script type="text/javascript" src="/static/jquery-1.3.1.js"></script>
+		<script type="text/javascript" src="/static/FiApp.js"></script>
+	</head>
+	<body> 
+		What is your age? (count: <%= count.to_s %>)?
+		<%= form_start %>
+			<input type="text" name="age" />
+			<input type="submit">
+		<%= form_end %>
+	</body>
+</html>
