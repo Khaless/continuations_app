@@ -7,6 +7,9 @@ module FiApp
 		def initialize
 			@listeners = []
 			@binding = binding # Default binding is the obj.
+
+			# TODO: can we metaclass this app path?
+			@app_path = 'apps/' + self.class.to_s.gsub(/([A-Z])/, '_\\1').downcase[1,255] + '/'
 		end
 
 		def resume_with_request(request)
@@ -22,7 +25,7 @@ module FiApp
 		def send_page(template, binding = @binding)
 			# Deregister all listeners for any previous page
 			@listeners = []
-			eruby = Erubis::Eruby.new(File.read('views/' + template + '.eruby'))
+			eruby = Erubis::Eruby.new(File.read(@app_path + 'views/' + template + '.eruby'))
 			[200, { 'Content-Type' => 'text/html' }, eruby.result(binding)]
 		end
 
@@ -76,7 +79,6 @@ module FiApp
 				false
 			end
 		end
-
 	end
 
 	class FiFireable
@@ -94,18 +96,4 @@ module FiApp
 			end if target == @name
 		end
 	end
-
-	class FiButton < FiFireable
-
-		def initialize args
-			super(args[:name])
-			@events = args[:events]
-		end
-
-		def html
-			"<input type=\"button\" name=\"" + @name + "\" class=\"async_button\" />"
-		end
-
-	end
-
 end

@@ -1,11 +1,11 @@
-require 'helpers/form.rb'
+require 'lib/helpers/form.rb'
 
-class MyApp < FiApp::Base
+class BasicApp < FiApp::Base
 
 	include FiFormHelper
 
 	def application
-		@binding = binding # Default binding is now in here
+		@binding = binding # Default binding inside this method
 
 		# local variables which will be collected
 		# over pages
@@ -26,7 +26,7 @@ class MyApp < FiApp::Base
 		end
 
 		# Display their name and age
-		send_page 'three', binding()
+		send_page 'three', {:name => name, :age => age, :count => count} # in this send_page, we define our own binding
 		
 	end
 end
